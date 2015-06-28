@@ -54,14 +54,33 @@ namespace Lokel.CoolFramework.Test {
 
         [TestCase(0)]
         [TestCase(1)]
-        public void EachDoTest(int num_vals) {
+        [TestCase(8)]
+        public void Add_and_EachDoTest(int num_vals) {
             Init(num_vals);
             int count = 0;
             B.EachDo((int v) =>
             {
+                Assert.AreEqual(Vals[count & 0x0F], v);
                 count++;
             });
             Assert.AreEqual(num_vals, count);
+        }
+
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(8)]
+        public void Add_and_CountPropTest(int num_vals) {
+            Init(num_vals);
+            Assert.AreEqual(num_vals, B.Count);
+        }
+
+        [TestCase(10)]
+        public void HasTest(int i) {
+            Init(10);
+            B.Has(i, () =>
+            {
+                Assert.True(true);
+            });
         }
     }
 }
