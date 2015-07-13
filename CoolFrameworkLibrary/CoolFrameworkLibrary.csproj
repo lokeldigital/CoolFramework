@@ -51,8 +51,12 @@
     <Compile Include="src\MessageSubscriber.cs" />
     <Compile Include="src\ModelVewControllerRolesAndEvents.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Points.cs" />
+    <Compile Include="src\RangedPoints.cs" />
     <Compile Include="src\Roles.cs" />
+    <Compile Include="src\ProcessingStack.cs" />
     <Compile Include="src\SubscribeToAttribute.cs" />
+    <Compile Include="src\AvlTree.cs" />
     <Compile Include="src\UniqueSet.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
