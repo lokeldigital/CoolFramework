@@ -47,11 +47,42 @@ namespace Lokel.CoolFramework.Test {
             Tree.Add(3);
             Tree.Add(2);
             Tree.Add(1);
+            Tree.Add(4);
 
             Tree.InOrder((i) => { Console.WriteLine("> " + i); });
-            Tree.Dump();
 
+            Tree.Dump();
+        }
+
+        [TestCase]
+        public void AvlTree_AddDoubleRotateLeft_Test() {
+            Func<int, int, bool> Smaller = (a, b) => { return a < b; };
+            AvlTree<int> Tree = new AvlTree<int>(Smaller);
+
+            Tree.Add(1);
             Tree.Add(4);
+            Tree.Add(3);
+            Tree.Add(5);
+            Tree.Add(2);
+
+            Tree.InOrder((i) => { Console.WriteLine("> " + i); });
+
+            Tree.Dump();
+        }
+
+        [TestCase]
+        public void AvlTree_AddRotateLeft_Test() {
+            Func<int, int, bool> Smaller = (a, b) => { return a < b; };
+            AvlTree<int> Tree = new AvlTree<int>(Smaller);
+
+            Tree.Add(1);
+            Tree.Add(2);
+            Tree.Add(3);
+            Tree.Add(4);
+            Tree.Add(5);
+
+            Tree.InOrder((i) => { Console.WriteLine("> " + i); });
+
             Tree.Dump();
         }
 
@@ -68,62 +99,104 @@ namespace Lokel.CoolFramework.Test {
             Tree.Dump();
 
             AvlTree<int>.NodeCheck
-                RootCheck,
-                Check_Left_Level1,
-                Check_Right_Level1,
-                Check_Left_Level2
+                RootCheck = new AvlTree<int>.NodeCheck(),
+                Check_Left1 = new AvlTree<int>.NodeCheck(),
+                Check_Right1 = new AvlTree<int>.NodeCheck(),
+                Check_Left1_Left2 = new AvlTree<int>.NodeCheck(),
+                Check_Right1_Left2 = new AvlTree<int>.NodeCheck(),
+                Check_Right1_Right2 = new AvlTree<int>.NodeCheck()
                 ;
 
-            RootCheck = new AvlTree<int>.NodeCheck()
+            RootCheck.Verify = (nodeCheck) =>
             {
-                Verify = (nodeCheck) =>
-                {
-                    Console.WriteLine(nodeCheck);
-                    Assert.AreEqual(2, nodeCheck.Value);
-                    return 2 == nodeCheck.Value;
-                }
+                Console.WriteLine(nodeCheck);
+                Assert.AreEqual(0, nodeCheck.ParentId);
+                Assert.AreNotEqual(0, nodeCheck.LeftId);
+                Assert.AreNotEqual(0, nodeCheck.RightId);
+                return true;
+            };
+            RootCheck.NextCheck = Check_Left1;
+
+            Check_Left1.Verify = (nodeCheck) =>
+            {
+                Console.WriteLine(nodeCheck);
+                Assert.AreEqual(RootCheck.ThisId, nodeCheck.ParentId);
+                Assert.AreEqual(RootCheck.LeftId, nodeCheck.ThisId);
+                Assert.Greater(RootCheck.Value, nodeCheck.Value);
+                Assert.AreNotEqual(0, nodeCheck.LeftId); // should be left node
+                Assert.AreEqual(0, nodeCheck.RightId); // but no right node.
+                return true;
+            };
+            Check_Left1.NextCheck = Check_Left1_Left2;
+
+            Check_Left1_Left2.Verify = (nodeCheck) =>
+            {
+                Console.WriteLine(nodeCheck);
+                Assert.AreEqual(0, nodeCheck.LeftId);
+                Assert.AreEqual(0, nodeCheck.RightId);
+                Assert.AreEqual(Check_Left1.ThisId, nodeCheck.ParentId);
+                Assert.Greater(Check_Left1.Value, nodeCheck.Value);
+                return true;
+            };
+            Check_Left1_Left2.NextCheck = Check_Right1;
+            
+            Check_Right1.Verify = (nodeCheck) =>
+            {
+                Console.WriteLine(nodeCheck);
+                Assert.AreEqual(RootCheck.ThisId, nodeCheck.ParentId);
+                Assert.AreEqual(RootCheck.RightId, nodeCheck.ThisId);
+                Assert.AreNotEqual(0, nodeCheck.LeftId);
+                Assert.AreNotEqual(0, nodeCheck.RightId);
+                Assert.Less(RootCheck.Value, nodeCheck.Value);
+                return true;
+            };
+            Check_Right1.NextCheck = Check_Right1_Left2;
+
+            Check_Right1_Left2.Verify = (nodeCheck) =>
+            {
+                Console.WriteLine(nodeCheck);
+                Assert.AreEqual(Check_Right1.ThisId, nodeCheck.ParentId);
+                Assert.AreEqual(Check_Right1.LeftId, nodeCheck.ThisId);
+                Assert.AreEqual(0, nodeCheck.LeftId);
+                Assert.AreEqual(0, nodeCheck.RightId);
+                Assert.Greater(Check_Right1.Value, nodeCheck.Value);
+                return true;
+            };
+            Check_Right1_Left2.NextCheck = Check_Right1_Right2;
+
+            Check_Right1_Right2.Verify = (nodeCheck) =>
+            {
+                Console.WriteLine(nodeCheck);
+                Assert.AreEqual(Check_Right1.ThisId, nodeCheck.ParentId);
+                Assert.AreEqual(Check_Right1.RightId, nodeCheck.ThisId);
+                Assert.AreEqual(0, nodeCheck.LeftId);
+                Assert.AreEqual(0, nodeCheck.RightId);
+                Assert.Less(Check_Right1.Value, nodeCheck.Value);
+                return false; // end of tree
             };
 
-            Check_Left_Level1 = new AvlTree<int>.NodeCheck()
-            {
-                Verify = (nodeCheck) =>
-                {
-                    Console.WriteLine(nodeCheck);
-                    Assert.AreEqual(RootCheck.ThisId, nodeCheck.ParentId);
-                    Assert.AreEqual(RootCheck.LeftId, nodeCheck.ThisId);
-                    return 1 == nodeCheck.Value;
-                }
-            };
-            RootCheck.NextCheck = Check_Left_Level1;
-            Check_Left_Level2 = new AvlTree<int>.NodeCheck()
-            {
-                Verify = (nodeCheck) =>
-                {
-                    Console.WriteLine(nodeCheck);
-                    Assert.AreEqual(0, nodeCheck.Value);
-                    return 0 == nodeCheck.Value;
-                }
-            };
-            Check_Left_Level1.NextCheck = Check_Left_Level2;
-
-            Check_Right_Level1 = new AvlTree<int>.NodeCheck()
-            {
-                Verify = (nodeCheck) =>
-                {
-                    Console.WriteLine(nodeCheck);
-                    Assert.AreEqual(RootCheck.ThisId, nodeCheck.ParentId);
-                    Assert.AreEqual(RootCheck.RightId, nodeCheck.ThisId);
-                    return 4 == nodeCheck.Value;
-                }
-            };
-            Check_Left_Level2.NextCheck = Check_Right_Level1;
             Tree.HierarchyCheck(RootCheck);
         }
 
-        //[TestCase]
-        //public void AvlTree_PostOrder_Test() {
+        [TestCase]
+        public void AvlTree_StringInsertionRebalance_Test() {
+            Func<string, string, bool> Smaller = (text1, text2) =>
+            {
+                return string.Compare(text1,text2,StringComparison.OrdinalIgnoreCase) < 0;
+            };
+            AvlTree<string> StrTree = new AvlTree<string>(Smaller);
 
-        //}
+            StrTree.Add("ORY");
+            StrTree.Add("JFK");
+            StrTree.Add("BRU");
+            StrTree.Add("DUS");
+            StrTree.Add("ZRH");
+            StrTree.Add("MEX");
+            StrTree.Add("ORD");
+            StrTree.Add("NRT");
+
+            StrTree.Dump();
+        }
     }
 
 } //-namespace

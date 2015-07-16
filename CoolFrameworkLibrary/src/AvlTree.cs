@@ -92,27 +92,9 @@ namespace Lokel.CoolFramework {
                 Func<T, bool> Check;
                 Func<Node, bool> Do;
 
-                Check = (v) => { return (_IsSmaller(val,v)); };
-                Do = (node) =>
-                {
-                    if (! (node._Left != null && node._Right != null) ) {
-                        if (node._Left == null && _IsSmaller(val, node._Value)) {
-                            node._Left = new Node(val);
-                            node._Left._Parent = node;
-                            current = node;
-                        } else if (node._Right == null && _IsSmaller(node._Value, val)) {
-                            node._Right = new Node(val);
-                            node._Right._Parent = node;
-                            current = node;
-                        }
-                        
-                        return false;
-                    }
-                    return true;
-                };
-                InOrder(_Root, Do, Check);
-                //Depth(current);
-                UpdateDepth(_Root);
+                Insert(val, _Root);
+
+                //UpdateDepth(_Root);
                 
                 Do = (node) =>
                 {
@@ -126,9 +108,35 @@ namespace Lokel.CoolFramework {
                 };
                 Check = (v) => { return true; };
                 PostOrder(_Root, Do, Check);
-                //UpdateDepth(_Root);
+            }
+        }
 
-                //Rebalance(ref current);
+        private void Insert(T _value, Node subtree) {
+            if (_IsSmaller(_value, subtree._Value)) {
+                if (subtree._Left != null) {
+                    Insert(_value, subtree._Left);
+                } else {
+                    subtree._Left = new Node(_value);
+                    subtree._Left._Parent = subtree;
+                    ReDepth(subtree._Left);
+                }
+            } else {
+                if (subtree._Right != null) {
+                    Insert(_value, subtree._Right);
+                } else {
+                    subtree._Right = new Node(_value);
+                    subtree._Right._Parent = subtree;
+                    ReDepth(subtree._Right);
+                }
+            }
+        }
+
+        private void ReDepth(Node leafNode) {
+            int depth = leafNode != null ? leafNode._Depth : 0;
+            while (leafNode != null ) {
+                leafNode._Depth = depth;
+                depth++;
+                leafNode = leafNode._Parent;
             }
         }
 
@@ -199,6 +207,8 @@ namespace Lokel.CoolFramework {
         // Take the given node as a sub-root
         private void RotateLeft(ref Node node) {
             Node T1, A, B, T2, T3, Parent;
+            int nodeDepth = node != null ? node._Depth : 0;
+
             if (node != null && node._Right != null) {
                 Parent = node._Parent;
                 A = node;
@@ -207,17 +217,20 @@ namespace Lokel.CoolFramework {
                 T2 = B._Left;
                 T3 = B._Right;
 
-                A._Right = T2; if (T2 != null) T2._Parent = A;
+                A._Right = T2; (T2 != null).IfTrue(() => { T2._Parent = A; });
+                A._Depth = B._Depth;
                 B._Left = A; B._Parent = A._Parent; A._Parent = B;
                 B._Parent = Parent;
                 (Parent != null && Parent._Left == A).IfTrue(() => { Parent._Left = B; });
                 (Parent != null && Parent._Right == A).IfTrue(() => { Parent._Right = B; });
                 node = B;
+                B._Depth = nodeDepth;
             }
         }
 
         private void RotateRight(ref Node node) {
             Node T1, A, T2, B, T3, Parent;
+            int nodeDepth = node != null ? node._Depth : 0;
 
             B = node;
             Parent = B._Parent;
@@ -227,15 +240,18 @@ namespace Lokel.CoolFramework {
             T3 = B._Right;
 
             A._Right = B; A._Parent = Parent; B._Parent = A;
+            B._Depth = A._Depth;
             (Parent != null && Parent._Left == B).IfTrue(() => { Parent._Left = A; });
             (Parent != null && Parent._Right == B).IfTrue(() => { Parent._Right = A; });
             node = A;
+            A._Depth = nodeDepth;
 
-            B._Left = T2; if (T2 != null) T2._Parent = B;
+            B._Left = T2; (T2 != null).IfTrue(() => { T2._Parent = B; });
         }
 
         private void RotateDoubleRight(ref Node node) {
             Node C, A, T1, B, T2, T3, T4, Parent;
+            int nodeDepth = node != null ? node._Depth : 0;
             if (node != null && node._Left != null && node._Left._Right != null) {
                 Parent = node._Parent;
                 C = node;
@@ -246,14 +262,20 @@ namespace Lokel.CoolFramework {
                 T2 = B._Left;
                 T3 = B._Right;
 
-                A._Right = T2; if (T2 != null) T2._Parent = A;
-                C._Left = T3; if (T3 != null) T3._Parent = C;
+                A._Right = T2; (T2 != null).IfTrue(() => { T2._Parent = A; });
+                A._Depth = B._Depth;
+                C._Left = T3; (T3 != null).IfTrue(() => { T3._Parent = C; });
                 B._Left = A; A._Parent = B;
                 B._Parent = Parent;
                 (Parent != null && Parent._Left == C).IfTrue(() => { Parent._Left = B; });
                 (Parent != null && Parent._Right == C).IfTrue(() => { Parent._Right = B; });
                 B._Right = C; C._Parent = B;
                 node = B;
+                B._Depth = nodeDepth;
+                (T1 != null).IfTrue(() => { ReDepth(T1); });
+                (T2 != null).IfTrue(() => { ReDepth(T2); });
+                (T3 != null).IfTrue(() => { ReDepth(T3); });
+                (T4 != null).IfTrue(() => { ReDepth(T4); });
             }
         }
 
@@ -277,6 +299,10 @@ namespace Lokel.CoolFramework {
                 (Parent != null && Parent._Left == C).IfTrue(() => { Parent._Left = B; });
                 (Parent != null && Parent._Right == C).IfTrue(() => { Parent._Right = C; });
                 node = B;
+                (T1 != null).IfTrue(() => { ReDepth(T1); });
+                (T2 != null).IfTrue(() => { ReDepth(T2); });
+                (T3 != null).IfTrue(() => { ReDepth(T3); });
+                (T4 != null).IfTrue(() => { ReDepth(T4); });
             }
         }
 
@@ -479,8 +505,10 @@ namespace Lokel.CoolFramework {
             Func<T, bool> check = (val) => { return true; };
             Func<Node, bool> Do = (node) =>
             {
-                _Validator.Update(node);
-                _Validator = _Validator.Verify(_Validator) ? _Validator.NextCheck : null;
+                if (_Validator != null) {
+                    _Validator.Update(node);
+                    _Validator = _Validator.Verify(_Validator) ? _Validator.NextCheck : null;
+                }
                 return _Validator != null;
             };
             PreOrder(_Root, Do, check);
