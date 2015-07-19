@@ -44,42 +44,21 @@ namespace Lokel.CoolFramework.Test {
             Func<int, int, bool> Smaller = (a, b) => { return a < b; };
             AvlTree<int> Tree = new AvlTree<int>(Smaller);
             AvlTree<int>.NodeCheck
-                _2 = new AvlTree<int>.NodeCheck(),
-                _1 = new AvlTree<int>.NodeCheck(),
-                _3 = new AvlTree<int>.NodeCheck(),
-                _4 = new AvlTree<int>.NodeCheck();
+                _2 = AvlTree<int>.NodeCheck.ConvirmValue(2),
+                _1 = AvlTree<int>.NodeCheck.ConvirmValue(1),
+                _3 = AvlTree<int>.NodeCheck.ConvirmValue(3),
+                _4 = AvlTree<int>.NodeCheck.ConvirmValue(4);
 
             Tree.Add(3);
             Tree.Add(2);
             Tree.Add(1);
             Tree.Add(4);
 
-            Tree.InOrder((i) => { Console.WriteLine("> " + i); });
-
-            _2.Verify = (nodeCheck) => {
-                Assert.AreEqual(2, nodeCheck.Value);
-                return true;
-            };
             _2.NextCheck = _1;
-            _1.Verify = (nodeCheck) =>
-            {
-                Assert.AreEqual(1, nodeCheck.Value);
-                return true;
-            };
             _1.NextCheck = _3;
-            _3.Verify = (nodeCheck) =>
-            {
-                Assert.AreEqual(3, nodeCheck.Value);
-                return true;
-            };
             _3.NextCheck = _4;
-            _4.Verify = (nodeCheck) =>
-            {
-                Assert.AreEqual(4, nodeCheck.Value);
-                return true;
-            };
             Tree.HierarchyCheck(_2);
-            Tree.Dump();
+            //Tree.Dump();
         }
 
         [TestCase]

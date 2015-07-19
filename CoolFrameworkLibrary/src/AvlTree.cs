@@ -46,7 +46,6 @@ namespace Lokel.CoolFramework {
                 _Left = Left;
                 _Right = Right;
                 _Parent = Parent;
-                //_DepthDifference = 0;
                 _Depth = 0;
             }
 
@@ -57,7 +56,6 @@ namespace Lokel.CoolFramework {
                 _Value = default(T);
                 _Left = _Right = null;
                 _Parent = null;
-                //_DepthDifference = 0;
             }
 
             public override string ToString() {
@@ -103,19 +101,6 @@ namespace Lokel.CoolFramework {
                 bool changed = false;
 
                 Insert(val, _Root);
-
-                Do = (node) =>
-                {
-                    bool isRoot = node == _Root;
-                    changed = Rebalance(ref node);
-                    if (isRoot && changed) {
-                        _Root = node;
-                        UpdateDepth(node);
-                    }
-                    return !changed;
-                };
-
-                //PostOrder(_Root, Do, null);
             }
         }
 
@@ -125,7 +110,6 @@ namespace Lokel.CoolFramework {
                 if (subtree._Left != null) {
                     Insert(_value, subtree._Left);
                 } else {
-                    Console.WriteLine("Inserting {0} at left of {1}", _value, subtree);
                     subtree._Left = new Node(_value);
                     subtree._Left._Parent = subtree;
                     ReDepth(subtree._Left);
@@ -135,7 +119,6 @@ namespace Lokel.CoolFramework {
                 if (subtree._Right != null) {
                     Insert(_value, subtree._Right);
                 } else {
-                    Console.WriteLine("Inserting {0} at right of {1}", _value, subtree);
                     subtree._Right = new Node(_value);
                     subtree._Right._Parent = subtree;
                     ReDepth(subtree._Right);
@@ -159,10 +142,8 @@ namespace Lokel.CoolFramework {
             while( node != null) {
                 BalanceNode = node;
                 (node == _Root).IfTrue(()=>{
-                    //Console.WriteLine("Processing Node: {0}", BalanceNode);
                     Rebalance(ref BalanceNode).IfTrue(()=>{_Root = BalanceNode;});
                 }).IfFalse(()=>{
-                    //Console.WriteLine("Processing Node: {0}", BalanceNode);
                     Rebalance(ref BalanceNode);
                 });
                 node = BalanceNode._Parent;
@@ -170,40 +151,27 @@ namespace Lokel.CoolFramework {
         }
 
         private bool Rebalance(ref Node node) {
-            //Node sub = node;
             int left;
             int right;
             int depth;
             int diff;
             bool changed = false;
-            string text;
 
             left = node._Left != null ? (1 + node._Left._Depth) : 0;
             right = node._Right != null ? (1 + node._Right._Depth) : 0;
             diff = left - right;
             depth = node._Depth;
-            text = string.Format("Rebalance Consideration: LRDiff: {0}  "
-                + "Depth:{1} Left:{2} Right:{3}",
-                diff,
-                depth,
-                left,
-                right
-            );
             if (diff >= 2) {
                 if (node._Left != null && node._Left._Left != null) {
-                    Console.WriteLine("Rotate Right - {0} : {1}", node, text);
                     RotateRight(ref node);
                 } else if(node._Left != null && node._Left._Right != null){
-                    Console.WriteLine("Double Rotate Right - {0} : {1}", node, text);
                     RotateDoubleRight(ref node);
                 }
                 changed = true;
             } else if (diff <= -2) {
                 if (node._Right != null && node._Right._Right != null) {
-                    Console.WriteLine("Rotate Left - {0} : {1}", node, text);
                     RotateLeft(ref node);
                 } else if (node._Right != null && node._Right._Left != null) {
-                    Console.WriteLine("Double Rotate Left - {0} : {1}", node, text);
                     RotateDoubleLeft(ref node);
                 }
                 changed = true;
@@ -211,8 +179,6 @@ namespace Lokel.CoolFramework {
             
             return changed;
         }
-
-        
 
         // Take the given node as a sub-root
         private void RotateLeft(ref Node node) {
@@ -494,36 +460,6 @@ namespace Lokel.CoolFramework {
                         break;
                 }
             }
-        }
-
-        private int Depth(Node node) {
-            int count = 0;
-            Node current = node;
-            while (current != null && current != _Root) {
-                count++;
-                current = current._Parent;
-            }
-            return count;
-        }
-
-        private void UpdateDepth(Node subtree) {
-            Func<T, bool> check = (v) => { return true; };
-            Func<Node, bool> Do = (node) =>
-            {
-                if (node._Left == null && node._Right == null) {
-                    node._Depth = 0;
-                    return true;
-                }
-                int d_left = node._Left != null ? node._Left._Depth : 0;
-                int d_right = node._Right != null ? node._Right._Depth : 0;
-                if (d_left > d_right) {
-                    node._Depth = 1 + d_left;
-                } else {
-                    node._Depth = 1 + d_right;
-                }
-                return true;
-            };
-            PostOrder(subtree, Do, check);
         }
 
         /// <summary>
