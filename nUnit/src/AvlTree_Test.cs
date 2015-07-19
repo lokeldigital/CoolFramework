@@ -43,6 +43,11 @@ namespace Lokel.CoolFramework.Test {
         public void AvlTree_Add_Test() {
             Func<int, int, bool> Smaller = (a, b) => { return a < b; };
             AvlTree<int> Tree = new AvlTree<int>(Smaller);
+            AvlTree<int>.NodeCheck
+                _2 = new AvlTree<int>.NodeCheck(),
+                _1 = new AvlTree<int>.NodeCheck(),
+                _3 = new AvlTree<int>.NodeCheck(),
+                _4 = new AvlTree<int>.NodeCheck();
 
             Tree.Add(3);
             Tree.Add(2);
@@ -51,6 +56,29 @@ namespace Lokel.CoolFramework.Test {
 
             Tree.InOrder((i) => { Console.WriteLine("> " + i); });
 
+            _2.Verify = (nodeCheck) => {
+                Assert.AreEqual(2, nodeCheck.Value);
+                return true;
+            };
+            _2.NextCheck = _1;
+            _1.Verify = (nodeCheck) =>
+            {
+                Assert.AreEqual(1, nodeCheck.Value);
+                return true;
+            };
+            _1.NextCheck = _3;
+            _3.Verify = (nodeCheck) =>
+            {
+                Assert.AreEqual(3, nodeCheck.Value);
+                return true;
+            };
+            _3.NextCheck = _4;
+            _4.Verify = (nodeCheck) =>
+            {
+                Assert.AreEqual(4, nodeCheck.Value);
+                return true;
+            };
+            Tree.HierarchyCheck(_2);
             Tree.Dump();
         }
 
@@ -58,6 +86,16 @@ namespace Lokel.CoolFramework.Test {
         public void AvlTree_AddDoubleRotateLeft_Test() {
             Func<int, int, bool> Smaller = (a, b) => { return a < b; };
             AvlTree<int> Tree = new AvlTree<int>(Smaller);
+            AvlTree<int>.NodeCheck
+                _3 = AvlTree<int>.NodeCheck.ConvirmValue(3),
+                _1 = AvlTree<int>.NodeCheck.ConvirmValue(1),
+                _2 = AvlTree<int>.NodeCheck.ConvirmValue(2),
+                _4 = AvlTree<int>.NodeCheck.ConvirmValue(4),
+                _5 = AvlTree<int>.NodeCheck.ConvirmValue(5);
+            _3.NextCheck = _1;
+            _1.NextCheck = _2;
+            _2.NextCheck = _4;
+            _4.NextCheck = _5;
 
             Tree.Add(1);
             Tree.Add(4);
@@ -65,15 +103,24 @@ namespace Lokel.CoolFramework.Test {
             Tree.Add(5);
             Tree.Add(2);
 
-            Tree.InOrder((i) => { Console.WriteLine("> " + i); });
-
-            Tree.Dump();
+            //Tree.Dump();
+            Tree.HierarchyCheck(_3);
         }
 
         [TestCase]
         public void AvlTree_AddRotateLeft_Test() {
             Func<int, int, bool> Smaller = (a, b) => { return a < b; };
             AvlTree<int> Tree = new AvlTree<int>(Smaller);
+            AvlTree<int>.NodeCheck
+                _2 = AvlTree<int>.NodeCheck.ConvirmValue(2),
+                _1 = AvlTree<int>.NodeCheck.ConvirmValue(1),
+                _4 = AvlTree<int>.NodeCheck.ConvirmValue(4),
+                _3 = AvlTree<int>.NodeCheck.ConvirmValue(3),
+                _5 = AvlTree<int>.NodeCheck.ConvirmValue(5);
+            _2.NextCheck = _1;
+            _1.NextCheck = _4;
+            _4.NextCheck = _3;
+            _3.NextCheck = _5;
 
             Tree.Add(1);
             Tree.Add(2);
@@ -81,9 +128,8 @@ namespace Lokel.CoolFramework.Test {
             Tree.Add(4);
             Tree.Add(5);
 
-            Tree.InOrder((i) => { Console.WriteLine("> " + i); });
-
-            Tree.Dump();
+            //Tree.Dump();
+            Tree.HierarchyCheck(_2);
         }
 
         [TestCase]
@@ -106,10 +152,12 @@ namespace Lokel.CoolFramework.Test {
                 Check_Right1_Left2 = new AvlTree<int>.NodeCheck(),
                 Check_Right1_Right2 = new AvlTree<int>.NodeCheck()
                 ;
-
+            // This is an explicit structural test
             RootCheck.Verify = (nodeCheck) =>
             {
                 Console.WriteLine(nodeCheck);
+                Assert.AreEqual(2, nodeCheck.Value);
+
                 Assert.AreEqual(0, nodeCheck.ParentId);
                 Assert.AreNotEqual(0, nodeCheck.LeftId);
                 Assert.AreNotEqual(0, nodeCheck.RightId);
@@ -120,6 +168,8 @@ namespace Lokel.CoolFramework.Test {
             Check_Left1.Verify = (nodeCheck) =>
             {
                 Console.WriteLine(nodeCheck);
+                Assert.AreEqual(1, nodeCheck.Value);
+
                 Assert.AreEqual(RootCheck.ThisId, nodeCheck.ParentId);
                 Assert.AreEqual(RootCheck.LeftId, nodeCheck.ThisId);
                 Assert.Greater(RootCheck.Value, nodeCheck.Value);
@@ -132,6 +182,8 @@ namespace Lokel.CoolFramework.Test {
             Check_Left1_Left2.Verify = (nodeCheck) =>
             {
                 Console.WriteLine(nodeCheck);
+                Assert.AreEqual(0, nodeCheck.Value);
+
                 Assert.AreEqual(0, nodeCheck.LeftId);
                 Assert.AreEqual(0, nodeCheck.RightId);
                 Assert.AreEqual(Check_Left1.ThisId, nodeCheck.ParentId);
@@ -143,6 +195,8 @@ namespace Lokel.CoolFramework.Test {
             Check_Right1.Verify = (nodeCheck) =>
             {
                 Console.WriteLine(nodeCheck);
+                Assert.AreEqual(4, nodeCheck.Value);
+
                 Assert.AreEqual(RootCheck.ThisId, nodeCheck.ParentId);
                 Assert.AreEqual(RootCheck.RightId, nodeCheck.ThisId);
                 Assert.AreNotEqual(0, nodeCheck.LeftId);
@@ -155,6 +209,8 @@ namespace Lokel.CoolFramework.Test {
             Check_Right1_Left2.Verify = (nodeCheck) =>
             {
                 Console.WriteLine(nodeCheck);
+                Assert.AreEqual(3, nodeCheck.Value);
+
                 Assert.AreEqual(Check_Right1.ThisId, nodeCheck.ParentId);
                 Assert.AreEqual(Check_Right1.LeftId, nodeCheck.ThisId);
                 Assert.AreEqual(0, nodeCheck.LeftId);
@@ -167,6 +223,8 @@ namespace Lokel.CoolFramework.Test {
             Check_Right1_Right2.Verify = (nodeCheck) =>
             {
                 Console.WriteLine(nodeCheck);
+                Assert.AreEqual(5, nodeCheck.Value);
+
                 Assert.AreEqual(Check_Right1.ThisId, nodeCheck.ParentId);
                 Assert.AreEqual(Check_Right1.RightId, nodeCheck.ThisId);
                 Assert.AreEqual(0, nodeCheck.LeftId);
@@ -176,6 +234,8 @@ namespace Lokel.CoolFramework.Test {
             };
 
             Tree.HierarchyCheck(RootCheck);
+            Console.WriteLine("\r\n: Tree Looks Like:");
+            Tree.InOrder((num) => { Console.WriteLine("> {0}", num); });
         }
 
         [TestCase]
@@ -195,8 +255,74 @@ namespace Lokel.CoolFramework.Test {
             StrTree.Add("ORD");
             StrTree.Add("NRT");
 
-            StrTree.Dump();
+            AvlTree<string>.NodeCheck
+                _JFK = AvlTree<string>.NodeCheck.ConvirmValue("JFK"),
+                _BRU = AvlTree<string>.NodeCheck.ConvirmValue("BRU"),
+                _DUS = AvlTree<string>.NodeCheck.ConvirmValue("DUS"),
+                _ORY = AvlTree<string>.NodeCheck.ConvirmValue("ORY"),
+                _NRT = AvlTree<string>.NodeCheck.ConvirmValue("NRT"),
+                _MEX = AvlTree<string>.NodeCheck.ConvirmValue("MEX"),
+                _ORD = AvlTree<string>.NodeCheck.ConvirmValue("ORD"),
+                _ZRH = AvlTree<string>.NodeCheck.ConvirmValue("ZRH");
+
+            _JFK.NextCheck = _BRU;
+            _BRU.NextCheck = _DUS;
+            _DUS.NextCheck = _ORY;
+            _ORY.NextCheck = _NRT;
+            _NRT.NextCheck = _MEX;
+            _MEX.NextCheck = _ORD;
+            _ORD.NextCheck = _ZRH;
+
+            StrTree.HierarchyCheck(_JFK);
         }
-    }
+
+        [TestCase]
+        public void AvlTree_String_ExtendedInsertionRebalance_Test() {
+            Func<string, string, bool> Smaller = (text1, text2) =>
+            {
+                return string.Compare(text1, text2, StringComparison.OrdinalIgnoreCase) < 0;
+            };
+            AvlTree<string> StrTree = new AvlTree<string>(Smaller);
+
+            StrTree.Add("ORY");
+            StrTree.Add("JFK");
+            StrTree.Add("BRU");
+            StrTree.Add("DUS");
+            StrTree.Add("ZRH");
+            StrTree.Add("MEX");
+            StrTree.Add("ORD");
+            StrTree.Add("NRT");
+            StrTree.Add("ARN");
+            StrTree.Add("GLA");
+            StrTree.Add("GCM");
+
+            AvlTree<string>.NodeCheck
+                _JFK = AvlTree<string>.NodeCheck.ConvirmValue("JFK"),
+                _BRU = AvlTree<string>.NodeCheck.ConvirmValue("BRU"),
+                _ARN = AvlTree<string>.NodeCheck.ConvirmValue("ARN"),
+                _GCM = AvlTree<string>.NodeCheck.ConvirmValue("GCM"),
+                _DUS = AvlTree<string>.NodeCheck.ConvirmValue("DUS"),
+                _GLA = AvlTree<string>.NodeCheck.ConvirmValue("GLA"),
+                _ORY = AvlTree<string>.NodeCheck.ConvirmValue("ORY"),
+                _NRT = AvlTree<string>.NodeCheck.ConvirmValue("NRT"),
+                _MEX = AvlTree<string>.NodeCheck.ConvirmValue("MEX"),
+                _ORD = AvlTree<string>.NodeCheck.ConvirmValue("ORD"),
+                _ZRH = AvlTree<string>.NodeCheck.ConvirmValue("ZRH");
+
+            _JFK.NextCheck = _BRU;
+            _BRU.NextCheck = _ARN;
+            _ARN.NextCheck = _GCM;
+            _GCM.NextCheck = _DUS;
+            _DUS.NextCheck = _GLA;
+            _GLA.NextCheck = _ORY;
+            _ORY.NextCheck = _NRT;
+            _NRT.NextCheck = _MEX;
+            _MEX.NextCheck = _ORD;
+            _ORD.NextCheck = _ZRH;
+
+            StrTree.HierarchyCheck(_JFK);
+        }
+
+    } //-Test Class
 
 } //-namespace

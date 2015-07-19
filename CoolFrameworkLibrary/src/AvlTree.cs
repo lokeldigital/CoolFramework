@@ -59,6 +59,16 @@ namespace Lokel.CoolFramework {
                 _Parent = null;
                 //_DepthDifference = 0;
             }
+
+            public override string ToString() {
+                return string.Format("Node = {0} @ {1} (Left: {2}, Right: {3}, Root?: {4}",
+                    _Value,
+                    _Depth,
+                    _Left == null ? "no" : "yes",
+                    _Right == null ? "no" : "yes",
+                    _Parent == null ? "yes" : "no"
+                );
+            }
         } //-Node
 
         private Node _Root;
@@ -89,44 +99,47 @@ namespace Lokel.CoolFramework {
             } else {
                 // Insert into correct spot.
                 Node current = _Root;
-                Func<T, bool> Check;
                 Func<Node, bool> Do;
+                bool changed = false;
 
                 Insert(val, _Root);
 
-                //UpdateDepth(_Root);
-                
                 Do = (node) =>
                 {
                     bool isRoot = node == _Root;
-                    bool changed = Rebalance(ref node);
+                    changed = Rebalance(ref node);
                     if (isRoot && changed) {
                         _Root = node;
                         UpdateDepth(node);
                     }
-                    return ! changed;
+                    return !changed;
                 };
-                Check = (v) => { return true; };
-                PostOrder(_Root, Do, Check);
+
+                //PostOrder(_Root, Do, null);
             }
         }
 
         private void Insert(T _value, Node subtree) {
+
             if (_IsSmaller(_value, subtree._Value)) {
                 if (subtree._Left != null) {
                     Insert(_value, subtree._Left);
                 } else {
+                    Console.WriteLine("Inserting {0} at left of {1}", _value, subtree);
                     subtree._Left = new Node(_value);
                     subtree._Left._Parent = subtree;
                     ReDepth(subtree._Left);
+                    BalanceLeafToRoot(subtree);
                 }
             } else {
                 if (subtree._Right != null) {
                     Insert(_value, subtree._Right);
                 } else {
+                    Console.WriteLine("Inserting {0} at right of {1}", _value, subtree);
                     subtree._Right = new Node(_value);
                     subtree._Right._Parent = subtree;
                     ReDepth(subtree._Right);
+                    BalanceLeafToRoot(subtree);
                 }
             }
         }
@@ -140,65 +153,62 @@ namespace Lokel.CoolFramework {
             }
         }
 
-        //private void UpdateDepthDifference(Node subtree) {
-        //    Func<T, bool> Check = (v) => { return true; };
-        //    Func<Node, bool> DoEach = (node) =>
-        //    {
-        //        int left, right;
-        //        if (node._Left != null) {
-        //            left = node._Left._DepthDifference + 1;
-        //        } else {
-        //            left = 0;
-        //        }
-        //        if (node._Right != null) {
-        //            right = node._Right._DepthDifference - 1;
-        //        } else {
-        //            right = 0;
-        //        }
-        //        node._DepthDifference = left - right;
-        //        return true;
-        //    };
-        //    PostOrder(subtree, DoEach, Check);
-        //}
+        private void BalanceLeafToRoot(Node node) {
+            Node BalanceNode;
+
+            while( node != null) {
+                BalanceNode = node;
+                (node == _Root).IfTrue(()=>{
+                    //Console.WriteLine("Processing Node: {0}", BalanceNode);
+                    Rebalance(ref BalanceNode).IfTrue(()=>{_Root = BalanceNode;});
+                }).IfFalse(()=>{
+                    //Console.WriteLine("Processing Node: {0}", BalanceNode);
+                    Rebalance(ref BalanceNode);
+                });
+                node = BalanceNode._Parent;
+            }
+        }
 
         private bool Rebalance(ref Node node) {
             //Node sub = node;
             int left;
             int right;
+            int depth;
             int diff;
             bool changed = false;
+            string text;
 
             left = node._Left != null ? (1 + node._Left._Depth) : 0;
             right = node._Right != null ? (1 + node._Right._Depth) : 0;
             diff = left - right;
-
-            switch (diff) {
-                case 0: break;
-                case 1: break;
-                case -1: break;
-                case 2:
-                    if (node._Left != null && node._Left._Left != null) {
-                        Console.WriteLine("Rotate Right");
-                        RotateRight(ref node);
-                    } else if(node._Left != null && node._Left._Right != null){
-                        Console.WriteLine("Double Rotate Right");
-                        RotateDoubleRight(ref node);
-                    }
-                    changed = true;
-                    break;
-                case -2:
-                    if (node._Right != null && node._Right._Right != null) {
-                        Console.WriteLine("Rotate Left");
-                        RotateLeft(ref node);
-                    } else if (node._Right != null && node._Right._Left != null) {
-                        Console.WriteLine("Double Rotate Left");
-                        RotateDoubleLeft(ref node);
-                    }
-                    changed = true;
-                    break;
-                default:
-                    break;
+            depth = node._Depth;
+            text = string.Format("Rebalance Consideration: LRDiff: {0}  "
+                + "Depth:{1} Left:{2} Right:{3}",
+                diff,
+                depth,
+                left,
+                right
+            );
+            if (diff >= 2) {
+                if (node._Left != null && node._Left._Left != null) {
+                    Console.WriteLine("Rotate Right - {0} : {1}", node, text);
+                    RotateRight(ref node);
+                } else if(node._Left != null && node._Left._Right != null){
+                    Console.WriteLine("Double Rotate Right - {0} : {1}", node, text);
+                    RotateDoubleRight(ref node);
+                }
+                changed = true;
+            } else if (diff <= -2) {
+                if (node._Right != null && node._Right._Right != null) {
+                    Console.WriteLine("Rotate Left - {0} : {1}", node, text);
+                    RotateLeft(ref node);
+                } else if (node._Right != null && node._Right._Left != null) {
+                    Console.WriteLine("Double Rotate Left - {0} : {1}", node, text);
+                    RotateDoubleLeft(ref node);
+                }
+                changed = true;
             }
+            
             return changed;
         }
 
@@ -207,30 +217,38 @@ namespace Lokel.CoolFramework {
         // Take the given node as a sub-root
         private void RotateLeft(ref Node node) {
             Node T1, A, B, T2, T3, Parent;
-            int nodeDepth = node != null ? node._Depth : 0;
+            int depth_left, depth_right;
 
-            if (node != null && node._Right != null) {
-                Parent = node._Parent;
-                A = node;
-                T1 = A._Left;
-                B = A._Right;
-                T2 = B._Left;
-                T3 = B._Right;
+            Parent = node._Parent;
+            A = node;
+            T1 = A._Left;
+            B = A._Right;
+            T2 = B._Left;
+            T3 = B._Right;
 
-                A._Right = T2; (T2 != null).IfTrue(() => { T2._Parent = A; });
-                A._Depth = B._Depth;
-                B._Left = A; B._Parent = A._Parent; A._Parent = B;
-                B._Parent = Parent;
-                (Parent != null && Parent._Left == A).IfTrue(() => { Parent._Left = B; });
-                (Parent != null && Parent._Right == A).IfTrue(() => { Parent._Right = B; });
-                node = B;
-                B._Depth = nodeDepth;
-            }
+            A._Right = T2; (T2 != null).IfTrue(() => { T2._Parent = A; });
+            B._Left = A; B._Parent = A._Parent; A._Parent = B;
+            B._Parent = Parent;
+            (Parent != null && Parent._Left == A).IfTrue(() => { Parent._Left = B; });
+            (Parent != null && Parent._Right == A).IfTrue(() => { Parent._Right = B; });
+            node = B;
+            
+            // A depth
+            depth_left = T1 != null ? 1 + T1._Depth : 0;
+            depth_right = T2 != null ? 1 + T2._Depth : 0;
+            A._Depth = Math.Max(depth_left, depth_right);
+
+            // B depth
+            depth_left = A._Depth + 1;
+            depth_right = T3 != null ? 1 + T3._Depth : 0;
+            B._Depth = Math.Max(depth_left, depth_right);
+
+            ReDepth(B);
         }
 
         private void RotateRight(ref Node node) {
             Node T1, A, T2, B, T3, Parent;
-            int nodeDepth = node != null ? node._Depth : 0;
+            int depth_left, depth_right;
 
             B = node;
             Parent = B._Parent;
@@ -240,70 +258,101 @@ namespace Lokel.CoolFramework {
             T3 = B._Right;
 
             A._Right = B; A._Parent = Parent; B._Parent = A;
-            B._Depth = A._Depth;
             (Parent != null && Parent._Left == B).IfTrue(() => { Parent._Left = A; });
             (Parent != null && Parent._Right == B).IfTrue(() => { Parent._Right = A; });
             node = A;
-            A._Depth = nodeDepth;
-
             B._Left = T2; (T2 != null).IfTrue(() => { T2._Parent = B; });
+
+            // B depth
+            depth_left = T2 != null ? T2._Depth + 1 : 0;
+            depth_right = T3 != null ? T3._Depth + 1 : 0;
+            B._Depth = Math.Max(depth_left, depth_right);
+
+            // A depth
+            depth_left = T1 != null ? T1._Depth + 1 : 0;
+            A._Depth = Math.Max(depth_left, B._Depth + 1);
+
+            ReDepth(A);
         }
 
         private void RotateDoubleRight(ref Node node) {
             Node C, A, T1, B, T2, T3, T4, Parent;
-            int nodeDepth = node != null ? node._Depth : 0;
-            if (node != null && node._Left != null && node._Left._Right != null) {
-                Parent = node._Parent;
-                C = node;
-                T4 = C._Right;
-                A = C._Left;
-                T1 = A._Left;
-                B = A._Right;
-                T2 = B._Left;
-                T3 = B._Right;
+            int depth_left, depth_right;
 
-                A._Right = T2; (T2 != null).IfTrue(() => { T2._Parent = A; });
-                A._Depth = B._Depth;
-                C._Left = T3; (T3 != null).IfTrue(() => { T3._Parent = C; });
-                B._Left = A; A._Parent = B;
-                B._Parent = Parent;
-                (Parent != null && Parent._Left == C).IfTrue(() => { Parent._Left = B; });
-                (Parent != null && Parent._Right == C).IfTrue(() => { Parent._Right = B; });
-                B._Right = C; C._Parent = B;
-                node = B;
-                B._Depth = nodeDepth;
-                (T1 != null).IfTrue(() => { ReDepth(T1); });
-                (T2 != null).IfTrue(() => { ReDepth(T2); });
-                (T3 != null).IfTrue(() => { ReDepth(T3); });
-                (T4 != null).IfTrue(() => { ReDepth(T4); });
-            }
+            Parent = node._Parent;
+            C = node;
+            T4 = C._Right;
+            A = C._Left;
+            T1 = A._Left;
+            B = A._Right;
+            T2 = B._Left;
+            T3 = B._Right;
+
+            A._Right = T2; (T2 != null).IfTrue(() => { T2._Parent = A; });
+            C._Left = T3; (T3 != null).IfTrue(() => { T3._Parent = C; });
+            B._Left = A; A._Parent = B;
+            B._Parent = Parent;
+            (Parent != null && Parent._Left == C).IfTrue(() => { Parent._Left = B; });
+            (Parent != null && Parent._Right == C).IfTrue(() => { Parent._Right = B; });
+            B._Right = C; C._Parent = B;
+            node = B;
+
+            //A depth first
+            depth_left = T1 != null ? 1 + T1._Depth : 0;
+            depth_right = T2 != null ? 1 + T2._Depth : 0;
+            A._Depth = Math.Max(depth_left, depth_right);
+
+            // C depth
+            depth_left = T3 != null ? 1 + T3._Depth : 0;
+            depth_right = T4 != null ? 1 + T4._Depth : 0;
+            C._Depth = Math.Max(depth_left, depth_right);
+
+            // B depth
+            depth_left = A._Depth + 1;
+            depth_right = B._Depth + 1;
+            B._Depth = Math.Max(depth_left, depth_right);
+
+            ReDepth(B);
         }
 
         private void RotateDoubleLeft(ref Node node) {
             Node A, B, C, T1, T2, T3, T4, Parent;
-            if (node != null && node._Right != null && node._Right._Left != null) {
-                Parent = node._Parent;
-                A = node;
-                C = A._Right;
-                B = C._Left;
-                T1 = A._Left;
-                T2 = B._Left;
-                T3 = B._Right;
-                T4 = C._Right;
+            int depth_left, depth_right;
 
-                A._Right = T2; if (T2 != null) T2._Parent = A;
-                C._Left = T3; if (T3 != null) T3._Parent = C;
-                B._Left = A; A._Parent = B;
-                B._Right = C; C._Parent = B;
-                B._Parent = Parent;
-                (Parent != null && Parent._Left == C).IfTrue(() => { Parent._Left = B; });
-                (Parent != null && Parent._Right == C).IfTrue(() => { Parent._Right = C; });
-                node = B;
-                (T1 != null).IfTrue(() => { ReDepth(T1); });
-                (T2 != null).IfTrue(() => { ReDepth(T2); });
-                (T3 != null).IfTrue(() => { ReDepth(T3); });
-                (T4 != null).IfTrue(() => { ReDepth(T4); });
-            }
+            Parent = node._Parent;
+            A = node;
+            C = A._Right;
+            B = C._Left;
+            T1 = A._Left;
+            T2 = B._Left;
+            T3 = B._Right;
+            T4 = C._Right;
+
+            A._Right = T2; if (T2 != null) T2._Parent = A;
+            C._Left = T3; if (T3 != null) T3._Parent = C;
+            B._Left = A; A._Parent = B;
+            B._Right = C; C._Parent = B;
+            B._Parent = Parent;
+            (Parent != null && Parent._Left == A).IfTrue(() => { Parent._Left = B; });
+            (Parent != null && Parent._Right == A).IfTrue(() => { Parent._Right = B; });
+            node = B;
+
+            //A depth first
+            depth_left = T1 != null ? 1 + T1._Depth : 0;
+            depth_right = T2 != null ? 1 + T2._Depth : 0;
+            A._Depth = Math.Max(depth_left, depth_right);
+
+            // C depth
+            depth_left = T3 != null ? 1 + T3._Depth : 0;
+            depth_right = T4 != null ? 1 + T4._Depth : 0;
+            C._Depth = Math.Max(depth_left, depth_right);
+
+            // B depth
+            depth_left = A._Depth + 1;
+            depth_right = B._Depth + 1;
+            B._Depth = Math.Max(depth_left, depth_right);
+
+            ReDepth(B);
         }
 
         public void InOrder(Action<T> Do) {
@@ -372,8 +421,12 @@ namespace Lokel.CoolFramework {
                 switch (Stack.StackTop_Step) {
                     case Step.VISIT_LEFT:
                         Stack.StackTop_Step = Step.POP_CENTRE;
-                        if (leaf._Left != null && Check( leaf._Left._Value) ) {
-                            Stack.Push(leaf._Left, Step.VISIT_LEFT);
+                        if (leaf._Left != null) {
+                            if (Check == null) {
+                                Stack.Push(leaf._Left, Step.VISIT_LEFT);
+                            } else if (Check(leaf._Left._Value)) {
+                                Stack.Push(leaf._Left, Step.VISIT_LEFT);
+                            }
                         }
                         break;
                     case Step.RETURN_VAL:
@@ -382,8 +435,12 @@ namespace Lokel.CoolFramework {
                         break;
                     case Step.VISIT_RIGHT:
                         Stack.StackTop_Step = Step.RETURN_VAL;
-                        if (leaf._Right != null && Check(leaf._Right._Value)) {
-                            Stack.Push(leaf._Right, Step.VISIT_RIGHT);
+                        if (leaf._Right != null ) {
+                            if (Check == null) {
+                                Stack.Push(leaf._Right, Step.VISIT_RIGHT);
+                            } else if (Check(leaf._Right._Value)) {
+                                Stack.Push(leaf._Right, Step.VISIT_RIGHT);
+                            }
                         }
                         break;
                     case Step.POP_CENTRE:
@@ -410,14 +467,22 @@ namespace Lokel.CoolFramework {
                 switch (Stack.StackTop_Step) {
                     case Step.VISIT_LEFT:
                         Stack.StackTop_Step = Step.VISIT_RIGHT;
-                        if (leaf._Left != null && Check(leaf._Left._Value)) {
-                            Stack.Push(leaf._Left, Step.VISIT_LEFT);
+                        if (leaf._Left != null) {
+                            if (Check == null ) {
+                                Stack.Push(leaf._Left, Step.VISIT_LEFT);
+                            } else if (Check(leaf._Left._Value)) {
+                                Stack.Push(leaf._Left, Step.VISIT_LEFT);
+                            }
                         }
                         break;
                     case Step.VISIT_RIGHT:
                         Stack.StackTop_Step = Step.RETURN_VAL;
-                        if (leaf._Right != null && Check(leaf._Right._Value)) {
-                            Stack.Push(leaf._Right, Step.VISIT_RIGHT);
+                        if (leaf._Right != null ) {
+                            if (Check == null) {
+                                Stack.Push(leaf._Right, Step.VISIT_RIGHT);
+                            } else if (Check(leaf._Right._Value)) {
+                                Stack.Push(leaf._Right, Step.VISIT_RIGHT);
+                            }
                         }
                         break;
                     case Step.RETURN_VAL:
@@ -436,7 +501,6 @@ namespace Lokel.CoolFramework {
             Node current = node;
             while (current != null && current != _Root) {
                 count++;
-                //current._Depth = count;
                 current = current._Parent;
             }
             return count;
@@ -462,6 +526,9 @@ namespace Lokel.CoolFramework {
             PostOrder(subtree, Do, check);
         }
 
+        /// <summary>
+        /// For Unit Testing the AvlTree.
+        /// </summary>
         public class NodeCheck {
             public int ParentId { get; private set; }
             public int ThisId { get; private set; }
@@ -498,8 +565,30 @@ namespace Lokel.CoolFramework {
                     );
                 return text;
             }
+
+            public static NodeCheck ConvirmValue(T _Value) {
+                NodeCheck nc = new NodeCheck();
+                nc.Verify = (nodeCheck) => {
+                    nodeCheck.Value.Equals(_Value).IfFalse(() => {
+                        throw new Exception(
+                            string.Format("Expected {0} - actual {1}",
+                                _Value,
+                                nodeCheck.Value
+                            )
+                        );
+                    });
+                    Console.WriteLine("Passed {0}", nodeCheck);
+                    return true;
+                };
+                return nc;
+            }
         }
 
+        /// <summary>
+        /// A pre-order check of the given node, then the left and
+        /// finally right subtrees.
+        /// </summary>
+        /// <param name="Validator">Node in a graph of tests in pre-order.</param>
         public void HierarchyCheck(NodeCheck Validator) {
             NodeCheck _Validator = Validator;
             Func<T, bool> check = (val) => { return true; };
