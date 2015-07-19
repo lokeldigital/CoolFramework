@@ -13,6 +13,8 @@ Containers
 
 * UniqueSet
 
+* AvlTree
+
 
 Middleware
 
@@ -24,6 +26,8 @@ Middleware
 
 Sponsor: Lokel Digital Pty Ltd (Melbourne)
 
+For more up-to-date documentation, [see the GitHub
+project wiki](https://github.com/lokeldigital/CoolFramework/wiki).
 
 Licence and Copyright
 ---------------------
