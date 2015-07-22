@@ -97,8 +97,6 @@ namespace Lokel.CoolFramework {
             } else {
                 // Insert into correct spot.
                 Node current = _Root;
-                Func<Node, bool> Do;
-                bool changed = false;
 
                 Insert(val, _Root);
             }

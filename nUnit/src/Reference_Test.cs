@@ -1,4 +1,5 @@
-﻿/*
+﻿
+/*
  *  CoolFramework
  *  -------------
  *  A C#.NET library for Object Oriented containers and publish-subscribe
@@ -35,52 +36,35 @@ using Lokel.CoolFramework;
 namespace Lokel.CoolFramework.Test {
 
     [TestFixture]
-    class BunchTest {
+    class Has_Test {
 
-        static int[] Vals = { -1, 10, 20, 15000,
-                                3, 9, 8, 21, 
-                                65, 45, 32, 65530,
-                                -21034, 10, 16, 8
-                            };
-        private Bunch<int> B = null;
+        [TestCase]
+        public void Reference_Simple_Test() {
+            string myString = "hi there";
+            string val = null;
+            bool mustBeTrue = false;
 
-        private void Init(int num_vals) {
-            B = new Bunch<int>();
-            int i = 0;
-            for (i = 0; i < num_vals; i++) {
-                B.Add(Vals[i & 0x0F]);
+            Console.WriteLine("-Started-");
+            Reference.NotNull(myString).AndNotNull(val).IfTrue(() => { Assert.Fail(); });
+            val = "yo";
+            Reference.NotNull(myString).AndNotNull(val).IfTrue(() => {
+                mustBeTrue = true;
+            })
+            .IfTrue(() => { Console.WriteLine("Values are myString = {0} / val = {1}", myString, val); });
+            Assert.IsTrue(mustBeTrue);
+        }
+
+        [TestCase(1000)]
+        public void Reference_Repeated_Test(int numRepeats) {
+            string value = "Count:";
+            Console.Write(".");
+            while (numRepeats > 0) {
+                value += string.Format(" {0}", numRepeats);
+                Reference.NotNull(value).IfTrue(() => { Console.Write("."); }).IfFalse(() => { Assert.Fail(); });
+                numRepeats--;
             }
         }
 
-        [TestCase(0)]
-        [TestCase(1)]
-        [TestCase(8)]
-        public void Bunch_Add_and_EachDoTest(int num_vals) {
-            Init(num_vals);
-            int count = 0;
-            B.EachDo((int v) =>
-            {
-                Assert.AreEqual(Vals[count & 0x0F], v);
-                count++;
-            });
-            Assert.AreEqual(num_vals, count);
-        }
-
-        [TestCase(0)]
-        [TestCase(1)]
-        [TestCase(8)]
-        public void Bunch_Add_and_CountPropTest(int num_vals) {
-            Init(num_vals);
-            Assert.AreEqual(num_vals, B.Count);
-        }
-
-        [TestCase(10)]
-        public void Bunch_HasTest(int i) {
-            Init(10);
-            B.Has(i, () =>
-            {
-                Assert.True(true);
-            });
-        }
     }
+
 }

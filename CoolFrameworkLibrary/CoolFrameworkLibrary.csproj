@@ -44,6 +44,7 @@
     <Compile Include="src\Extensions\DoOnceBlock.cs" />
     <Compile Include="src\Extensions\ObjectExt.cs" />
     <Compile Include="src\Groups.cs" />
+    <Compile Include="src\Reference.cs" />
     <Compile Include="src\InfoTypes.cs" />
     <Compile Include="src\LoggerTask.cs" />
     <Compile Include="src\Message.cs" />
@@ -52,7 +53,6 @@
     <Compile Include="src\ModelVewControllerRolesAndEvents.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\Points.cs" />
-    <Compile Include="src\RangedPoints.cs" />
     <Compile Include="src\Roles.cs" />
     <Compile Include="src\ProcessingStack.cs" />
     <Compile Include="src\SubscribeToAttribute.cs" />
