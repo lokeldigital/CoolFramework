@@ -96,8 +96,6 @@ namespace Lokel.CoolFramework {
                 _Root = new Node(val);
             } else {
                 // Insert into correct spot.
-                Node current = _Root;
-
                 Insert(val, _Root);
             }
         }
@@ -151,14 +149,14 @@ namespace Lokel.CoolFramework {
         private bool Rebalance(ref Node node) {
             int left;
             int right;
-            int depth;
+            //int depth;
             int diff;
             bool changed = false;
 
             left = node._Left != null ? (1 + node._Left._Depth) : 0;
             right = node._Right != null ? (1 + node._Right._Depth) : 0;
             diff = left - right;
-            depth = node._Depth;
+            //depth = node._Depth;
             if (diff >= 2) {
                 if (node._Left != null && node._Left._Left != null) {
                     RotateRight(ref node);

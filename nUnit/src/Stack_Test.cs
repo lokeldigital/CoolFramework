@@ -24,6 +24,7 @@
  *  USA
  */
 
+#if NUNIT
 
 using System;
 using System.Collections.Generic;
@@ -105,3 +106,5 @@ namespace Lokel.CoolFramework.Test {
         }
     }
 }
+
+#endif

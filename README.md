@@ -7,13 +7,13 @@ contract than interfaces or inheritance provide.
 
 Containers
 
-* Bunch
+* Bunch         - An unsorted collection.
 
-* Groups
+* Groups        - key-multi-value-pairs.  A group is identified with a key and can hold many items.
 
-* UniqueSet
+* UniqueSet     - A set of unique objects.
 
-* AvlTree
+* AvlTree       - A binary tree that rebalances on insertion (maintaining the AVL property).
 
 
 Middleware
@@ -23,6 +23,23 @@ Middleware
 * Message
 
 * MessageSubscriber
+
+
+#Unity3D
+
+This library is designed for use with Unity3D and underpins Lokel Digital's
+editor extension products.
+
+Download the source or clone the GIT repository under the Asset folder in
+your Unity project.
+
+#VisualStudio
+
+This library was built with VisualStudio but uses the nUnit test framework
+to make it most accessible.  Therefore, it could also be developed with
+Xamarin or other .NET IDE tools.
+
+#Licence and Copyright
 
 Sponsor: Lokel Digital Pty Ltd (Melbourne)
 
