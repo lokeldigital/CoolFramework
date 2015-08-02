@@ -24,7 +24,6 @@
  *  USA
  */
 
-#if NUNIT
 
 using System;
 using System.Collections.Generic;
@@ -307,5 +306,3 @@ namespace Lokel.CoolFramework.Test {
 
 } //-namespace
 
-#endif
-// nUnit specific test cases

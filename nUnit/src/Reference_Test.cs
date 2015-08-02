@@ -25,7 +25,6 @@
  *  USA
  */
 
-#if NUNIT
 
 using System;
 using System.Collections.Generic;
@@ -39,7 +38,7 @@ namespace Lokel.CoolFramework.Test {
     [TestFixture]
     class Has_Test {
 
-        [TestCase]
+        [Test]
         public void Reference_Simple_Test() {
             string myString = "hi there";
             string val = null;
@@ -58,10 +57,10 @@ namespace Lokel.CoolFramework.Test {
         [TestCase(1000)]
         public void Reference_Repeated_Test(int numRepeats) {
             string value = "Count:";
-            Console.Write(".");
+            //Console.Write(".");
             while (numRepeats > 0) {
                 value += string.Format(" {0}", numRepeats);
-                Reference.NotNull(value).IfTrue(() => { Console.Write("."); }).IfFalse(() => { Assert.Fail(); });
+                Reference.NotNull(value).IfTrue(() => { Assert.Pass(); }).IfFalse(() => { Assert.Fail(); });
                 numRepeats--;
             }
         }
@@ -70,4 +69,3 @@ namespace Lokel.CoolFramework.Test {
 
 }
 
-#endif // nUnit
