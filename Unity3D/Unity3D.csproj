@@ -62,7 +62,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\Unity\CoolMachineUnity2015\Library\UnityAssemblies\UnityEngine.dll</HintPath>
+      <HintPath>..\..\Library\UnityAssemblies\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -104,6 +104,10 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath) $(SolutionDir)\..\Assets\Lokel\CoolFramework\Plugins
+dir $(SolutionDir)\..\Assets\Lokel\CoolFramework\Plugins</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
