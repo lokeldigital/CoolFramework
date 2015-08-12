@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoolFrameworkLibrary", "CoolFrameworkLibrary\CoolFrameworkLibrary.csproj", "{6E2ECFA0-6422-4352-946F-7573053423F3}"
 EndProject
@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{2C93E1
 	ProjectSection(SolutionItems) = preProject
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity3D", "Unity3D\Unity3D.csproj", "{41B099A7-6A26-4170-87A7-213235B6F234}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +28,10 @@ Global
 		{9CB8BA4A-5D40-42D2-98C6-9461208E68C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CB8BA4A-5D40-42D2-98C6-9461208E68C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CB8BA4A-5D40-42D2-98C6-9461208E68C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41B099A7-6A26-4170-87A7-213235B6F234}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41B099A7-6A26-4170-87A7-213235B6F234}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41B099A7-6A26-4170-87A7-213235B6F234}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41B099A7-6A26-4170-87A7-213235B6F234}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
